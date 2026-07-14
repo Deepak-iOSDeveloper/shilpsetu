@@ -110,7 +110,8 @@ export const AddProductAI: React.FC = () => {
       const formData = new FormData();
       formData.append('image', file);
 
-      const res = await fetch('http://localhost:5000/api/products/analyze-image', {
+      const API_BASE = import.meta.env.PROD ? 'https://shilpsetu.onrender.com/api' : 'http://localhost:5000/api';
+      const res = await fetch(`${API_BASE}/products/analyze-image`, {
         method: 'POST',
         body: formData,
       });

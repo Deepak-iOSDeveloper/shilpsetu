@@ -63,7 +63,7 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = import.meta.env.PROD ? 'https://shilpsetu.onrender.com/api' : 'http://localhost:5000/api';
 
 const defaultProducts: Product[] = [
   {
