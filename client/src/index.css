@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-brandbg text-text-primary font-body antialiased;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-bold text-text-primary;
+  }
+}
+
+/* Indian textile patterns (ikat/block-print inspired) */
+.textile-pattern-divider {
+  height: 8px;
+  background-image: repeating-linear-gradient(45deg, #FF6B35, #FF6B35 10px, transparent 10px, transparent 20px),
+                    repeating-linear-gradient(-45deg, #FFC857, #FFC857 10px, #FFF8F1 10px, #FFF8F1 20px);
+  background-size: 20px 8px;
+  opacity: 0.2;
+}
+
+.textile-border-bottom {
+  border-bottom: 4px dashed #FF6B35;
+  position: relative;
+}
+
+.textile-border-bottom::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  right: 0;
+  border-bottom: 2px dotted #FFC857;
+}
+
+/* Hide scrollbars for horizontal scroll grids */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Animation for the scan line */
+@keyframes scan {
+  0% { top: 0%; }
+  50% { top: 100%; }
+  100% { top: 0%; }
+}
+.scan-line {
+  position: absolute;
+  height: 3px;
+  width: 100%;
+  background: #2E7D32;
+  box-shadow: 0 0 8px #2E7D32;
+  animation: scan 4s infinite linear;
+}
+
+/* Pulse animation for current pipeline stage */
+@keyframes stage-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.8; }
+}
+.pulse-stage {
+  animation: stage-pulse 2s infinite ease-in-out;
+}
+
+/* Instagram-like heart pop animation */
+@keyframes heart-pop {
+  0% { transform: scale(0); opacity: 0; }
+  15% { transform: scale(1.2); opacity: 0.9; }
+  30% { transform: scale(0.9); opacity: 1; }
+  80% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+.animate-heart-pop {
+  animation: heart-pop 0.7s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}

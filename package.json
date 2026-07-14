@@ -1,0 +1,10 @@
+{
+  "name": "shilpsetu",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm start --prefix server",
+    "dev": "npx.cmd -y concurrently \"npm run dev:client\" \"npm run dev:server\""
+  }
+}
