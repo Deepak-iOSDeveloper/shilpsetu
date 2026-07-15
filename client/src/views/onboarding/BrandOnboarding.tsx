@@ -399,7 +399,7 @@ export const BrandOnboarding: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-between p-6 bg-[#FFFBF7] min-h-screen">
+    <div className="flex-1 flex flex-col justify-between p-6 bg-[#FFFBF7] min-h-dvh">
       
       {/* Top Navigation Row */}
       <div className="flex items-center justify-between mb-4">

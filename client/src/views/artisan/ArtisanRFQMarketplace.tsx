@@ -33,7 +33,7 @@ export const ArtisanRFQMarketplace: React.FC = () => {
   // Main RFQs Data
   const [rfqs, setRfqs] = useState<RFQItem[]>([
     {
-      id: 'RFQ-2025-0487',
+      id: 'CUSTOM-2025-0487',
       brandName: 'Heritage Living',
       location: 'Jaipur, Rajasthan',
       logoChar: 'H',
@@ -49,7 +49,7 @@ export const ArtisanRFQMarketplace: React.FC = () => {
       deadlineDate: '2026-05-28' // 28 May 2026
     },
     {
-      id: 'RFQ-2025-0462',
+      id: 'CUSTOM-2025-0462',
       brandName: 'Niraya Designs',
       location: 'Bangalore, Karnataka',
       logoChar: 'N',
@@ -67,7 +67,7 @@ export const ArtisanRFQMarketplace: React.FC = () => {
   ]);
 
   // Selected RFQ for bidding (defaults to first item to show the screen layout exactly like the snap)
-  const [selectedRfqId, setSelectedRfqId] = useState<string>('RFQ-2025-0487');
+  const [selectedRfqId, setSelectedRfqId] = useState<string>('CUSTOM-2025-0487');
 
   // Bid forms state
   const [quoteForms, setQuoteForms] = useState<Record<string, {
@@ -81,7 +81,7 @@ export const ArtisanRFQMarketplace: React.FC = () => {
     agreedToTerms: boolean;
     isSaved: boolean;
   }>>({
-    'RFQ-2025-0487': {
+    'CUSTOM-2025-0487': {
       pricePerPiece: '',
       productionStartDate: '2026-05-01',
       quantitySupply: '200',
@@ -92,7 +92,7 @@ export const ArtisanRFQMarketplace: React.FC = () => {
       agreedToTerms: true,
       isSaved: false
     },
-    'RFQ-2025-0462': {
+    'CUSTOM-2025-0462': {
       pricePerPiece: '',
       productionStartDate: '2026-05-01',
       quantitySupply: '200',
@@ -127,7 +127,7 @@ export const ArtisanRFQMarketplace: React.FC = () => {
       }
     }));
     const isSavedNow = !quoteForms[rfqId]?.isSaved;
-    alert(isSavedNow ? "RFQ bookmarked successfully!" : "RFQ removed from saved bookmarks.");
+    alert(isSavedNow ? "Custom order bookmarked successfully!" : "Custom order removed from saved bookmarks.");
   };
 
   const handleFormSubmit = (rfq: RFQItem) => {
@@ -159,7 +159,7 @@ export const ArtisanRFQMarketplace: React.FC = () => {
     }
 
     if (!form.agreedToTerms) {
-      alert("You must agree to the RFQ terms and conditions.");
+      alert("You must agree to the Custom order terms and conditions.");
       return;
     }
 
@@ -195,7 +195,7 @@ export const ArtisanRFQMarketplace: React.FC = () => {
   };
 
   const getRfqSpecs = (rfqId: string) => {
-    if (rfqId === 'RFQ-2025-0487') {
+    if (rfqId === 'CUSTOM-2025-0487') {
       return {
         material: 'Pure Silk',
         technique: 'Handwoven Banarasi',

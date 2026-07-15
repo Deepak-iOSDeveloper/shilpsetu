@@ -36,6 +36,7 @@ export const AddProductAI: React.FC = () => {
   
   const [isAutofilling, setIsAutofilling] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   
   // Custom prompt generate states
@@ -208,29 +209,36 @@ export const AddProductAI: React.FC = () => {
   };
 
   const handlePublish = async () => {
+    if (isPublishing) return;
+
     if (!name || !category || !craftType || price <= 0 || uploadedImages.length === 0) {
       alert("Please fill all required details (photos, name, category, craft, price) before publishing.");
       return;
     }
 
-    const res = await addProduct({
-      name,
-      category,
-      craftType,
-      material,
-      price,
-      stockQty,
-      weight,
-      description,
-      images: uploadedImages,
-      aiGenerated: !!selectedStyle
-    });
+    setIsPublishing(true);
+    try {
+      const res = await addProduct({
+        name,
+        category,
+        craftType,
+        material,
+        price,
+        stockQty,
+        weight,
+        description,
+        images: uploadedImages,
+        aiGenerated: !!selectedStyle
+      });
 
-    if (res.success) {
-      alert("Product published successfully!");
-      setCurrentView('dashboard');
-    } else {
-      alert("Publish failed: " + res.error);
+      if (res.success) {
+        alert("Product published successfully!");
+        setCurrentView('dashboard');
+      } else {
+        alert("Publish failed: " + res.error);
+      }
+    } finally {
+      setIsPublishing(false);
     }
   };
 
@@ -605,12 +613,20 @@ export const AddProductAI: React.FC = () => {
             Save Draft
           </button>
           
-          <Button 
+          <Button
             onClick={handlePublish}
+            disabled={isPublishing}
             fullWidth={false}
-            className="flex-1"
+            className={`flex-1 ${isPublishing ? 'opacity-60 cursor-not-allowed' : ''}`}
           >
-            Publish Product
+            {isPublishing ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Publishing...</span>
+              </>
+            ) : (
+              'Publish Product'
+            )}
           </Button>
         </div>
 

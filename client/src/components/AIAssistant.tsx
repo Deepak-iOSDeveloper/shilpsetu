@@ -14,8 +14,8 @@ interface Message {
 }
 
 export const AIAssistant: React.FC = () => {
-  const { 
-    currentView, setCurrentView, addProduct, aiAutofillData, setAiAutofillData,
+  const {
+    currentView, setCurrentView, aiAutofillData, setAiAutofillData,
     products, wallets, orders, notifications, currentUser
   } = useApp();
 
@@ -257,28 +257,31 @@ export const AIAssistant: React.FC = () => {
         replyText = "Kripya kis craft ko banana hai woh specify karein, jaise Banarasi Saree ya Blue Pottery. (Please specify a craft like Banarasi Saree or Blue Pottery to auto-generate.)";
       }
     } 
-    // 3. Question / Answer intents
+    // 3. Question / Answer intents (answered from real app state, not canned data)
     else if (text.includes('balance') || text.includes('wallet') || text.includes('paisa') || text.includes('कमाई')) {
       const balance = wallets['artisan-1']?.balance || 0;
       replyText = `Aapka current wallet balance ₹${balance.toLocaleString('en-IN')} hai. (Your wallet balance is ₹${balance.toLocaleString('en-IN')})`;
+    } else if (text.includes('stock') || text.includes('maal') || text.includes('inventory')) {
+      // Real stock calculation from live product data (not a canned number)
+      const totalStock = products.reduce((sum, p) => sum + p.stockQty, 0);
+      const lowStockCount = products.filter(p => p.status === 'lowStock').length;
+      const outOfStockCount = products.filter(p => p.status === 'outOfStock').length;
+      replyText = language === 'hi'
+        ? `Aapke ${products.length} products mein total ${totalStock} units stock hai. Inme se ${lowStockCount} low stock mein hain aur ${outOfStockCount} out of stock hain.`
+        : `Across your ${products.length} products, you have a total of ${totalStock} units in stock. ${lowStockCount} products are running low and ${outOfStockCount} are out of stock.`;
+    } else if (text.includes('how many product') || text.includes('total product') || text.includes('kitne product')) {
+      replyText = language === 'hi'
+        ? `Aapke inventory mein total ${products.length} products listed hain.`
+        : `You currently have ${products.length} products listed in your inventory.`;
+    } else if (text.includes('revenue') || text.includes('sales') || text.includes('बिक्री')) {
+      const totalRevenue = orders.reduce((sum, o) => sum + o.amount, 0);
+      replyText = language === 'hi'
+        ? `Aapke saare orders ka total revenue ₹${totalRevenue.toLocaleString('en-IN')} hai.`
+        : `Your total revenue across all orders is ₹${totalRevenue.toLocaleString('en-IN')}.`;
     } else if (text.includes('order') || text.includes('sourcing') || text.includes('ग्राहक')) {
       const pendingCount = orders.filter(o => o.status !== 'delivered').length;
       replyText = `Aapke paas abhi ${pendingCount} active orders hain jo dispatch karne baki hain. (You have ${pendingCount} active orders waiting for dispatch.)`;
-    } else if (text.includes('supabase') || text.includes('save') || text.includes('save product') || text.includes('list')) {
-      // Direct mock upload trigger to Supabase
-      addProduct({
-        name: 'AI Generated Silk Saree',
-        category: 'Textiles',
-        craftType: 'Handloom Weaving',
-        material: 'Pure Silk',
-        price: 8999,
-        stockQty: 10,
-        weight: 600,
-        description: 'AI Generated organic silk handloom product saved safely inside Supabase database.',
-        images: ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600']
-      });
-      replyText = "Maine is product details ko Supabase database mein safely list kar diya hai! (Successfully listed this product in the Supabase database!)";
-    } 
+    }
     // 4. Fallback greetings / conversational (Gemini Powered)
     else {
       try {

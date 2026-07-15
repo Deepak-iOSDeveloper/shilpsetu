@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { 
-  ChevronLeft, Camera, Shield, Users, Layers, 
-  MapPin, CheckCircle2, Phone, Mail, User, Plus, Minus, X
+import {
+  ChevronLeft, Camera, Shield, Users, Layers,
+  MapPin, CheckCircle2, Phone, Mail, User, Plus, Minus, X, Loader2, AlertCircle
 } from 'lucide-react';
 
 // Custom Banner SVG 1: Female Weaver at Handloom
@@ -201,6 +201,11 @@ export const ArtisanOnboarding: React.FC = () => {
   // ==========================================
   const [locationVerified, setLocationVerified] = useState(false);
   const [gpsCoordinates, setGpsCoordinates] = useState<string | null>(null);
+  const [verifiedLat, setVerifiedLat] = useState<number | null>(null);
+  const [verifiedLng, setVerifiedLng] = useState<number | null>(null);
+  const [verifiedAddress, setVerifiedAddress] = useState<string | null>(null);
+  const [isVerifyingLocation, setIsVerifyingLocation] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const [businessType, setBusinessType] = useState('Individual Artisan');
   const [teamSize, setTeamSize] = useState(1);
   const [monthlyProduction, setMonthlyProduction] = useState('100');
@@ -441,8 +446,63 @@ export const ArtisanOnboarding: React.FC = () => {
     }
   };
 
+  const handleVerifyLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError("Geolocation is not supported by this browser. Please enable location access or try a different browser.");
+      return;
+    }
+
+    setLocationError(null);
+    setIsVerifyingLocation(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        const latStr = latitude >= 0 ? `${latitude.toFixed(4)}° N` : `${Math.abs(latitude).toFixed(4)}° S`;
+        const lngStr = longitude >= 0 ? `${longitude.toFixed(4)}° E` : `${Math.abs(longitude).toFixed(4)}° W`;
+
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=14&addressdetails=1`,
+            { headers: { 'Accept-Language': 'en' } }
+          );
+          if (!res.ok) throw new Error("Reverse geocoding request failed");
+          const data = await res.json();
+          const addr = data.address || {};
+          const locality = addr.city || addr.town || addr.village || addr.suburb || addr.county || '';
+          const state = addr.state || '';
+          const resolvedAddress = data.display_name || [locality, state].filter(Boolean).join(', ') || 'Location verified';
+
+          setVerifiedLat(latitude);
+          setVerifiedLng(longitude);
+          setVerifiedAddress([locality, state].filter(Boolean).join(', ') || resolvedAddress);
+          setGpsCoordinates(`${latStr}, ${lngStr}`);
+          setLocationVerified(true);
+        } catch (err) {
+          // GPS succeeded but reverse geocoding failed — still accept the real
+          // coordinates, just without a resolved address label.
+          setVerifiedLat(latitude);
+          setVerifiedLng(longitude);
+          setVerifiedAddress(null);
+          setGpsCoordinates(`${latStr}, ${lngStr}`);
+          setLocationVerified(true);
+        } finally {
+          setIsVerifyingLocation(false);
+        }
+      },
+      (error) => {
+        setIsVerifyingLocation(false);
+        setLocationError(
+          error.code === error.PERMISSION_DENIED
+            ? "Location access denied. Please allow location permission in your browser settings and try again."
+            : "Could not detect your location. Please check your device's location settings and try again."
+        );
+      }
+    );
+  };
+
   const handleFinalOnboardingSubmit = () => {
-    if (!locationVerified) {
+    if (!locationVerified || verifiedLat === null || verifiedLng === null) {
       alert("Please verify your physical location to complete onboarding.");
       return;
     }
@@ -460,7 +520,7 @@ export const ArtisanOnboarding: React.FC = () => {
       teamSize,
       monthlyProduction: parseInt(monthlyProduction) || 100,
       monthlyProductionUnit: productionUnit,
-      location: { lat: 25.3176, lng: 82.9739, address: 'Madanpura, Varanasi, UP' }
+      location: { lat: verifiedLat, lng: verifiedLng, address: verifiedAddress || `${gpsCoordinates}` }
     };
 
     // Register user inside global AppState
@@ -472,7 +532,7 @@ export const ArtisanOnboarding: React.FC = () => {
 
 
   return (
-    <div className="flex-1 flex flex-col justify-between p-6 bg-[#FFFBF7] min-h-screen">
+    <div className="flex-1 flex flex-col justify-between p-6 bg-[#FFFBF7] min-h-dvh">
       
       {/* Top Navigation Row */}
       <div className="flex items-center justify-between mb-4">
@@ -995,15 +1055,20 @@ export const ArtisanOnboarding: React.FC = () => {
                     <span className="text-[10px] text-stone-500 font-extrabold block mt-1.5">
                       GPS: {gpsCoordinates}
                     </span>
-                    <span className="text-[9px] text-stone-400 font-bold block">
-                      Region: Varanasi, Uttar Pradesh, India
-                    </span>
+                    {verifiedAddress && (
+                      <span className="text-[9px] text-stone-400 font-bold block mt-0.5 max-w-[260px]">
+                        {verifiedAddress}
+                      </span>
+                    )}
                   </div>
                   <button
                     type="button"
                     onClick={() => {
                       setLocationVerified(false);
                       setGpsCoordinates(null);
+                      setVerifiedLat(null);
+                      setVerifiedLng(null);
+                      setVerifiedAddress(null);
                     }}
                     className="text-[9px] text-stone-500 font-extrabold hover:underline"
                   >
@@ -1013,47 +1078,35 @@ export const ArtisanOnboarding: React.FC = () => {
               ) : (
                 <button
                   type="button"
-                  onClick={() => {
-                    if (navigator.geolocation) {
-                      navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                          const latStr = position.coords.latitude >= 0 ? `${position.coords.latitude.toFixed(4)}° N` : `${Math.abs(position.coords.latitude).toFixed(4)}° S`;
-                          const lngStr = position.coords.longitude >= 0 ? `${position.coords.longitude.toFixed(4)}° E` : `${Math.abs(position.coords.longitude).toFixed(4)}° W`;
-                          const coords = `${latStr}, ${lngStr}`;
-                          setGpsCoordinates(coords);
-                          setLocationVerified(true);
-                          alert(`Location verified via GPS! Coords: ${coords}`);
-                        },
-                        (error) => {
-                          const fallbackCoords = "25.3176° N, 82.9739° E";
-                          setGpsCoordinates(fallbackCoords);
-                          setLocationVerified(true);
-                          alert(`Location verified (Mock GPS): ${fallbackCoords}`);
-                        }
-                      );
-                    } else {
-                      const fallbackCoords = "25.3176° N, 82.9739° E";
-                      setGpsCoordinates(fallbackCoords);
-                      setLocationVerified(true);
-                      alert(`Location verified: ${fallbackCoords}`);
-                    }
-                  }}
-                  className="w-full h-32 rounded-2xl border-2 border-dashed border-stone-200 bg-stone-50 hover:bg-stone-100 flex flex-col items-center justify-center gap-2 group transition-all"
+                  disabled={isVerifyingLocation}
+                  onClick={handleVerifyLocation}
+                  className="w-full h-32 rounded-2xl border-2 border-dashed border-stone-200 bg-stone-50 hover:bg-stone-100 flex flex-col items-center justify-center gap-2 group transition-all disabled:opacity-70"
                 >
                   <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
-                    <MapPin className="w-5 h-5" />
+                    {isVerifyingLocation ? <Loader2 className="w-5 h-5 animate-spin" /> : <MapPin className="w-5 h-5" />}
                   </div>
                   <div>
-                    <span className="text-xs font-black text-stone-850 block">Tap to Verify Location</span>
+                    <span className="text-xs font-black text-stone-850 block">
+                      {isVerifyingLocation ? 'Detecting your location...' : 'Tap to Verify Location'}
+                    </span>
                     <span className="text-[10px] text-stone-400 block mt-0.5">Required for geo-location verification</span>
                   </div>
                 </button>
               )}
 
-              <div className="flex items-center justify-center gap-1.5 mt-3 text-green-600 text-[10px] font-black uppercase tracking-wider">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>GPS Verification Available</span>
-              </div>
+              {locationError && (
+                <div className="mt-3 flex items-start gap-1.5 text-left bg-red-50 border border-red-200 rounded-xl p-2.5">
+                  <AlertCircle className="w-3.5 h-3.5 text-red-500 shrink-0 mt-0.5" />
+                  <span className="text-[10px] font-bold text-red-600">{locationError}</span>
+                </div>
+              )}
+
+              {!locationVerified && !locationError && (
+                <div className="flex items-center justify-center gap-1.5 mt-3 text-green-600 text-[10px] font-black uppercase tracking-wider">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>GPS Verification Available</span>
+                </div>
+              )}
             </div>
 
             {/* Business Type dropdown */}

@@ -224,7 +224,7 @@ export const CreateRFQ: React.FC = () => {
       deadlineDate: expiryDate,
       techPackUrl: uploadedFileName ? '#' : undefined
     });
-    alert(`RFQ Published Live to Indian Artisan Network!\nQuotes will begin arriving for ${productName} on your RFQ dashboard.`);
+    alert(`Custom Order Published Live to Indian Artisan Network!\nQuotes will begin arriving for ${productName} on your Custom Orders dashboard.`);
     setCurrentView('rfq-market');
   };
 
@@ -249,7 +249,7 @@ export const CreateRFQ: React.FC = () => {
           >
             <ChevronLeft className="w-5 h-5 text-stone-700" />
           </button>
-          <h2 className="font-heading font-black text-base text-stone-850">Create Custom RFQ</h2>
+          <h2 className="font-heading font-black text-base text-stone-850">Create Custom Order</h2>
         </div>
       </div>
 
@@ -297,7 +297,7 @@ export const CreateRFQ: React.FC = () => {
           {activeStep === 1 && (
             <div className="flex flex-col gap-4.5 text-left text-xs font-semibold text-stone-850">
               <div>
-                <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest block mb-1">RFQ Title *</label>
+                <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest block mb-1">Custom Order Title *</label>
                 <input
                   type="text"
                   value={rfqTitle}
@@ -498,7 +498,7 @@ export const CreateRFQ: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-[8px] font-black text-stone-400 uppercase block mb-1">RFQ Expiry Date</label>
+                    <label className="text-[8px] font-black text-stone-400 uppercase block mb-1">Custom Order Expiry Date</label>
                     <input
                       type="date"
                       value={expiryDate}
@@ -835,7 +835,7 @@ export const CreateRFQ: React.FC = () => {
                   <span className="font-extrabold text-stone-850">{deliveryDeadline}</span>
                 </div>
                 <div className="flex justify-between border-b border-stone-100 pb-2 items-center">
-                  <span className="text-stone-500 font-bold">RFQ Expiry Date</span>
+                  <span className="text-stone-500 font-bold">Custom Order Expiry Date</span>
                   <span className="font-extrabold text-stone-850">{expiryDate}</span>
                 </div>
                 <div className="flex justify-between border-b border-stone-100 pb-2 items-center">
@@ -870,7 +870,7 @@ export const CreateRFQ: React.FC = () => {
                 
                 {/* RFQ Visibility Custom Selector */}
                 <div>
-                  <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest block mb-1">RFQ Visibility *</label>
+                  <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest block mb-1">Custom Order Visibility *</label>
                   <div className="flex items-center bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 focus-within:border-[#FF6B35]">
                     <span className="text-stone-600 mr-2 text-xs">🌐</span>
                     <select
@@ -952,7 +952,7 @@ export const CreateRFQ: React.FC = () => {
         {/* Footer info verification badge */}
         <div className="flex items-center gap-1.5 justify-center text-[#FF6B35] text-[10px] font-extrabold uppercase tracking-wide">
           <CheckCircle2 className="w-3.5 h-3.5" />
-          <span>Only verified artisans will respond to RFQ</span>
+          <span>Only verified artisans will respond to Custom Orders</span>
         </div>
 
         {/* Stepper Buttons */}
@@ -986,7 +986,7 @@ export const CreateRFQ: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  alert('RFQ saved as draft successfully!');
+                  alert('Custom order saved as draft successfully!');
                   setCurrentView('rfq-market');
                 }}
                 className="px-4 py-4 text-xs font-bold text-stone-600 bg-stone-100 hover:bg-stone-200 rounded-xl"
@@ -997,7 +997,7 @@ export const CreateRFQ: React.FC = () => {
                 onClick={handlePublish}
                 className="flex-1 bg-stone-900 hover:bg-stone-800 text-white"
               >
-                Publish RFQ
+                Publish Custom Order
               </Button>
             </div>
           )}
@@ -1027,7 +1027,7 @@ export const CreateRFQ: React.FC = () => {
             </div>
 
             <p className="text-xs text-stone-500 font-medium leading-relaxed">
-              Select reference design images from our curated catalog of Indian handcrafts and textiles to attach to your RFQ.
+              Select reference design images from our curated catalog of Indian handcrafts and textiles to attach to your Custom Order.
             </p>
 
             <div className="grid grid-cols-4 gap-3 max-h-64 overflow-y-auto p-1">

@@ -27,6 +27,7 @@ interface AppContextType {
   
   // Commerce & Core DB
   products: Product[];
+  newlyAddedProductIds: string[];
   rfqs: RFQ[];
   orders: Order[];
   wallets: Record<string, Wallet>;
@@ -182,7 +183,7 @@ const defaultProducts: Product[] = [
 
 const defaultRfqs: RFQ[] = [
   {
-    id: 'rfq-1',
+    id: 'custom-1',
     brandId: 'brand-1',
     brandName: 'FabIndia',
     category: 'Textiles',
@@ -216,7 +217,7 @@ const defaultRfqs: RFQ[] = [
     ]
   },
   {
-    id: 'rfq-2',
+    id: 'custom-2',
     brandId: 'brand-1',
     brandName: 'Anouk Crafts',
     category: 'Textiles',
@@ -418,7 +419,7 @@ const defaultOrders: Order[] = [
   // RFQ BULK ORDERS (type: 'RFQ')
   // ==========================================
   {
-    id: 'RFQ-SS-9921',
+    id: 'CUSTOM-SS-9921',
     buyerId: 'brand-taneira',
     buyerName: 'Taneira',
     buyerSubtitle: 'A TATA Product',
@@ -436,7 +437,7 @@ const defaultOrders: Order[] = [
     createdAt: '2026-05-20T09:00:00Z'
   },
   {
-    id: 'RFQ-SS-9922',
+    id: 'CUSTOM-SS-9922',
     buyerId: 'brand-fabindia',
     buyerName: 'Fabindia',
     buyerSubtitle: 'Celebrate India',
@@ -454,7 +455,7 @@ const defaultOrders: Order[] = [
     createdAt: '2026-05-20T10:00:00Z'
   },
   {
-    id: 'RFQ-SS-9923',
+    id: 'CUSTOM-SS-9923',
     buyerId: 'brand-aachho',
     buyerName: 'Aachho',
     buyerSubtitle: 'Ethnic. Authentic. You.',
@@ -472,7 +473,7 @@ const defaultOrders: Order[] = [
     createdAt: '2026-05-19T10:00:00Z'
   },
   {
-    id: 'RFQ-SS-9924',
+    id: 'CUSTOM-SS-9924',
     buyerId: 'brand-kalki',
     buyerName: 'Kalki Fashion',
     buyerSubtitle: 'Celebrate Craftsmanship',
@@ -697,7 +698,7 @@ const defaultOrders: Order[] = [
     createdAt: '2026-05-01T09:00:00Z'
   },
   {
-    id: 'RFQ-2026-001',
+    id: 'CUSTOM-2026-001',
     buyerId: 'brand-heritage',
     buyerName: 'Heritage Looms Pvt. Ltd.',
     buyerSubtitle: 'Ananya Sharma | +91 98765 43210',
@@ -708,7 +709,7 @@ const defaultOrders: Order[] = [
     items: [
       {
         productId: 'p-1',
-        name: 'Banarasi Silk Saree (Bulk RFQ)',
+        name: 'Banarasi Silk Saree (Bulk Custom)',
         price: 5000,
         qty: 50,
         image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400',
@@ -724,7 +725,7 @@ const defaultOrders: Order[] = [
     createdAt: '2026-06-30T10:00:00Z'
   },
   {
-    id: 'RFQ-2026-002',
+    id: 'CUSTOM-2026-002',
     buyerId: 'brand-ethnic',
     buyerName: 'Ethnic Threads India',
     buyerSubtitle: 'Rahul Mehta | +91 99887 66554',
@@ -735,7 +736,7 @@ const defaultOrders: Order[] = [
     items: [
       {
         productId: 'p-1',
-        name: 'Banarasi Silk Saree (Bulk RFQ)',
+        name: 'Banarasi Silk Saree (Bulk Custom)',
         price: 5000,
         qty: 50,
         image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400',
@@ -778,7 +779,7 @@ const defaultWallets: Record<string, Wallet> = {
 
 const defaultNotifications: Notification[] = [
   { id: 'n-1', uid: 'artisan-1', type: 'order', message: 'You have received a new order for 2 Banarasi Silk Sarees from FabIndia Boutique.', read: false, createdAt: '2026-06-20T10:05:00Z' },
-  { id: 'n-2', uid: 'brand-1', type: 'rfq', message: 'Naaz Begum has submitted a quote of ₹295/pc for your Hand Block Printing RFQ.', read: false, createdAt: '2026-06-21T08:30:00Z' }
+  { id: 'n-2', uid: 'brand-1', type: 'rfq', message: 'Naaz Begum has submitted a quote of ₹295/pc for your Hand Block Printing Custom Order.', read: false, createdAt: '2026-06-21T08:30:00Z' }
 ];
 
 const defaultPortfolioPosts = [
@@ -912,6 +913,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // DB States (Local Mirror)
   const [products, setProducts] = useState<Product[]>(defaultProducts);
+  const [newlyAddedProductIds, setNewlyAddedProductIds] = useState<string[]>([]);
   const [rfqs, setRfqs] = useState<RFQ[]>(defaultRfqs);
   const [orders, setOrders] = useState<Order[]>(defaultOrders);
   const [wallets, setWallets] = useState<Record<string, Wallet>>(defaultWallets);
@@ -1169,7 +1171,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                   uid: artData.id,
                   idType: artData.id_type,
                   idStatus: 'verified',
-                  location: { lat: artData.location_lat || 25.3, lng: artData.location_lng || 82.9, address: artData.location_address || '' },
+                  location: { lat: artData.location_lat ?? 0, lng: artData.location_lng ?? 0, address: artData.location_address || 'Not verified' },
                   businessType: artData.business_type,
                   teamSize: artData.team_size,
                   monthlyProduction: artData.monthly_capacity,
@@ -1420,7 +1422,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             team_size: data.teamSize || 1,
             monthly_capacity: data.monthlyProduction || 100,
             monthly_capacity_unit: data.monthlyProductionUnit || 'pcs',
-            location_address: 'Varanasi, UP',
+            location_lat: data.location?.lat ?? null,
+            location_lng: data.location?.lng ?? null,
+            location_address: data.location?.address || '',
             verified_status: true
           });
           if (artisanError) {
@@ -1451,7 +1455,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         uid: userUuid,
         idType: data.idType || 'Artisan Card',
         idStatus: 'verified',
-        location: data.location || { lat: 25.3, lng: 82.9, address: 'Kabeer Nagar, Varanasi, UP' },
+        location: data.location || { lat: 0, lng: 0, address: 'Not verified' },
         businessType: data.businessType || 'Individual Artisan',
         teamSize: data.teamSize || 1,
         monthlyProduction: data.monthlyProduction || 10,
@@ -1529,6 +1533,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Client update
     setProducts(prev => [newProduct, ...prev]);
+    setNewlyAddedProductIds(prev => [newProduct.id, ...prev]);
 
     // Supabase DB Sync
     if (isSupabaseConfigured() && authUserId) {
@@ -1594,16 +1599,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
-    // Backend save
-    try {
-      await fetch(`${API_BASE}/products`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newProduct)
-      });
-    } catch (e) {
+    // Backend save (fire-and-forget: failures are non-fatal since the
+    // product is already committed to Supabase/local state above, and
+    // awaiting this needlessly delays publish when the server is cold)
+    fetch(`${API_BASE}/products`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newProduct)
+    }).catch(() => {
       console.warn("Express endpoint offline, saved locally.");
-    }
+    });
 
     addNotification(
       finalUserId,
@@ -1758,7 +1763,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn("Express server offline, saved locally.");
     }
     
-    addNotification('artisan-1', 'rfq', `New RFQ published by ${newRfq.brandName} for ${newRfq.qty} pcs of ${newRfq.craftType}.`);
+    addNotification('artisan-1', 'rfq', `New Custom Order published by ${newRfq.brandName} for ${newRfq.qty} pcs of ${newRfq.craftType}.`);
   };
 
   const submitQuote = (rfqId: string, quote: Omit<RFQQuote, 'status'>) => {
@@ -1802,7 +1807,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     
     const r = rfqs.find(x => x.id === rfqId);
     if (r) {
-      addNotification(r.brandId, 'rfq', `Artisan ${quote.artisanName} submitted a quote of ₹${quote.price}/pc for your RFQ.`);
+      addNotification(r.brandId, 'rfq', `Artisan ${quote.artisanName} submitted a quote of ₹${quote.price}/pc for your Custom Order.`);
     }
   };
 
@@ -1830,7 +1835,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (targetRfq && acceptedQuote) {
       const orderAmount = acceptedQuote.price * targetRfq.qty;
-      const orderId = 'ORD-RFQ-' + Math.floor(100000 + Math.random() * 900000);
+      const orderId = 'ORD-CUSTOM-' + Math.floor(100000 + Math.random() * 900000);
       
       // Deduct buyer wallet
       const buyerId = targetRfq.brandId;
@@ -1848,7 +1853,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 id: 'tx-' + Date.now(),
                 type: 'debit',
                 amount: orderAmount,
-                description: `Payment reserved for RFQ Order ${orderId}`,
+                description: `Payment reserved for Custom Order ${orderId}`,
                 date: new Date().toISOString().split('T')[0]
               },
               ...wallet.transactions
@@ -1877,7 +1882,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         amount: orderAmount,
         status: 'placed',
         statusHistory: [
-          { status: 'placed', timestamp: new Date().toISOString(), note: 'RFQ quote accepted, order created' }
+          { status: 'placed', timestamp: new Date().toISOString(), note: 'Custom Order quote accepted, order created' }
         ],
         deliveryDate: new Date(Date.now() + acceptedQuote.days * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         type: 'RFQ',
@@ -1941,7 +1946,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return r;
     }));
-    addNotification(artisanId, 'rfq', `Your quote for RFQ ${rfqId} has been declined.`);
+    addNotification(artisanId, 'rfq', `Your quote for Custom Order ${rfqId} has been declined.`);
   };
 
   const updateOrderStatus = (orderId: string, status: OrderStatus) => {
@@ -2259,6 +2264,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updateOnboardingData,
       
       products,
+      newlyAddedProductIds,
       rfqs,
       orders,
       wallets,

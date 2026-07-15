@@ -59,7 +59,7 @@ export const ArtisanAnalytics: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-[#FFFBF8] min-h-screen relative font-sans text-left pb-20 select-none">
+    <div className="flex-1 flex flex-col bg-[#FFFBF8] min-h-dvh relative font-sans text-left pb-20 select-none">
       
       {/* 1. TOP HEADER */}
       <div className="p-4 bg-white border-b border-stone-100 flex items-center justify-between shadow-sm sticky top-0 z-30 shrink-0">
@@ -188,7 +188,7 @@ export const ArtisanAnalytics: React.FC = () => {
             <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${activeTab === 'rfq' ? 'bg-[#FF6B35]/10' : 'bg-stone-50'}`}>
               <MessageSquare className="w-4 h-4" />
             </div>
-            <span className="text-[9px] font-black tracking-tight text-center leading-tight">RFQ Activity</span>
+            <span className="text-[9px] font-black tracking-tight text-center leading-tight">Custom Activity</span>
           </div>
 
           {/* Tab 5: AI Insight */}
@@ -511,7 +511,7 @@ export const ArtisanAnalytics: React.FC = () => {
           {/* SECTION 4: RFQ ACTIVITY */}
           <div ref={rfqRef} className="scroll-mt-36 flex flex-col gap-3">
             <h3 className="text-xs font-black text-stone-400 uppercase tracking-wider text-left pl-1">
-              RFQ Activity Feed
+              Custom Order Activity Feed
             </h3>
 
             {/* RFQ stats grid cards */}
@@ -524,7 +524,7 @@ export const ArtisanAnalytics: React.FC = () => {
                     <MessageSquare className="w-4.5 h-4.5 text-[#FF6B35]" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="text-[8px] text-stone-400 font-bold uppercase tracking-wider block">RFQs Received</span>
+                    <span className="text-[8px] text-stone-400 font-bold uppercase tracking-wider block">Custom Orders Received</span>
                     <span className="text-sm font-black text-stone-800">24</span>
                   </div>
                 </div>

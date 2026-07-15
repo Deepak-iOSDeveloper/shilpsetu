@@ -355,7 +355,7 @@ export const BrandProfile: React.FC = () => {
                 <span className="font-mono font-black text-stone-800 block mt-0.5">26 Listings</span>
               </div>
               <div>
-                <span className="text-stone-400 font-bold">RFQs Created</span>
+                <span className="text-stone-400 font-bold">Custom Orders Created</span>
                 <span className="font-mono font-black text-stone-800 block mt-0.5">8 Sourcing</span>
               </div>
               <div>

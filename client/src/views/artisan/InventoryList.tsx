@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Card } from '../../components/Card';
 import { StatusPill } from '../../components/StatusPill';
-import { 
-  ChevronLeft, Package, Search, Plus, 
-  Upload, ChevronRight, AlertCircle, Edit3, Save, X, Camera
+import {
+  ChevronLeft, Package, Search, Plus,
+  Upload, ChevronRight, AlertCircle, Edit3, Save, X, Camera, BookmarkCheck
 } from 'lucide-react';
 import { Product } from '../../types';
 
 export const InventoryList: React.FC = () => {
-  const { products, updateProductStock, updateProduct, setCurrentView } = useApp();
+  const { products, newlyAddedProductIds, updateProductStock, updateProduct, setCurrentView } = useApp();
   const [search, setSearch] = useState('');
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
 
   // Selected product states for detail & edit views
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -26,11 +27,13 @@ export const InventoryList: React.FC = () => {
   const [editDescription, setEditDescription] = useState('');
   const [editImage, setEditImage] = useState('');
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.sku.toLowerCase().includes(search.toLowerCase()) ||
-    p.craftType.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredProducts = products
+    .filter(p => !showSavedOnly || newlyAddedProductIds.includes(p.id))
+    .filter(p =>
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.sku.toLowerCase().includes(search.toLowerCase()) ||
+      p.craftType.toLowerCase().includes(search.toLowerCase())
+    );
 
   const handleStockClick = (id: string, currentQty: number) => {
     const nextStr = prompt(`Update stock quantity:`, String(currentQty));
@@ -395,6 +398,18 @@ export const InventoryList: React.FC = () => {
           </button>
           <h2 className="font-heading font-black text-base text-stone-850">My Products</h2>
         </div>
+
+        <button
+          onClick={() => setShowSavedOnly(prev => !prev)}
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-black border transition-all ${
+            showSavedOnly
+              ? 'bg-[#FF511A] border-[#FF511A] text-white'
+              : 'bg-white border-stone-200 text-stone-600 hover:bg-stone-50'
+          }`}
+        >
+          <BookmarkCheck className="w-3.5 h-3.5" />
+          <span>Saved Products</span>
+        </button>
       </div>
 
       <div className="p-6 flex-1 overflow-y-auto no-scrollbar pb-[148px] flex flex-col gap-5">
@@ -409,6 +424,13 @@ export const InventoryList: React.FC = () => {
             className="w-full text-xs font-medium text-stone-800 placeholder:text-stone-300 focus:outline-none bg-transparent py-1.5"
           />
         </div>
+
+        {showSavedOnly && (
+          <div className="flex items-center gap-1.5 -mt-2 text-[10px] font-bold text-[#FF511A]">
+            <BookmarkCheck className="w-3.5 h-3.5" />
+            <span>Showing only products you've added this session</span>
+          </div>
+        )}
 
         {/* Products Row Checklist */}
         <div className="flex flex-col gap-3">
@@ -463,7 +485,11 @@ export const InventoryList: React.FC = () => {
           {filteredProducts.length === 0 && (
             <div className="text-center py-12 flex flex-col items-center gap-2 bg-white rounded-3xl border border-stone-150">
               <AlertCircle className="w-10 h-10 text-stone-300" />
-              <span className="text-xs font-bold text-stone-500">No products found matching your search.</span>
+              <span className="text-xs font-bold text-stone-500">
+                {showSavedOnly
+                  ? "You haven't added any products yet. Publish one from Add Product to see it here."
+                  : "No products found matching your search."}
+              </span>
             </div>
           )}
         </div>

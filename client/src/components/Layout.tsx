@@ -35,7 +35,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const triggerMockQuote = () => {
     // Submit a mock quote to rfq-1
     const bidPrice = Math.floor(250 + Math.random() * 50);
-    submitQuote('rfq-1', {
+    submitQuote('custom-1', {
       artisanId: 'artisan-' + Date.now(),
       artisanName: 'Karan Singh',
       artisanAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
@@ -44,7 +44,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       price: bidPrice,
       days: 18
     });
-    alert(`Mock Quote Triggered!\nNew bid of ₹${bidPrice}/pc added to RFQ-1.`);
+    alert(`Mock Quote Triggered!\nNew bid of ₹${bidPrice}/pc added to Custom-1.`);
   };
 
   const triggerOrderStatusChange = () => {
@@ -62,7 +62,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-stone-100 flex flex-col md:flex-row justify-center items-stretch font-body">
+    <div className="min-h-dvh bg-stone-100 flex flex-col md:flex-row justify-center items-stretch font-body">
       
       {/* Dev Dashboard Panel (Desktop Only) */}
       {showConsole && (
@@ -170,7 +170,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 className="flex items-center gap-2 text-left w-full p-2.5 rounded-xl border border-stone-200 bg-stone-50 hover:bg-stone-100 text-xs font-medium text-text-primary transition-all"
               >
                 <MessageSquare className="w-4 h-4 text-secondary-dark shrink-0" />
-                <span>Simulate Brand RFQ Bid</span>
+                <span>Simulate Brand Custom Order Bid</span>
               </button>
 
               <button
@@ -190,7 +190,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <span className="font-bold text-text-primary">{products.length}</span>
               </div>
               <div className="flex justify-between text-text-secondary">
-                <span>Active RFQs:</span>
+                <span>Active Custom Orders:</span>
                 <span className="font-bold text-text-primary">{rfqs.length}</span>
               </div>
               <div className="flex justify-between text-text-secondary">
@@ -226,7 +226,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       </button>
 
       {/* Main Mobile App Frame */}
-      <main className="w-full max-w-[480px] bg-brandbg min-h-screen relative flex flex-col shadow-2xl overflow-hidden pb-16">
+      <main className="w-full max-w-[480px] bg-brandbg min-h-dvh relative flex flex-col shadow-2xl overflow-hidden pb-16">
         {/* Render children views */}
         <div className="flex-1 flex flex-col overflow-y-auto no-scrollbar">
           {children}

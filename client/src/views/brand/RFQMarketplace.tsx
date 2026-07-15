@@ -9,7 +9,7 @@ import {
 
 export const RFQMarketplace: React.FC = () => {
   const { rfqs, acceptQuote, declineQuote, setCurrentView } = useApp();
-  const [selectedRfqId, setSelectedRfqId] = useState<string>('rfq-1');
+  const [selectedRfqId, setSelectedRfqId] = useState<string>('custom-1');
   const [search, setSearch] = useState('');
 
   const activeRfq = rfqs.find(r => r.id === selectedRfqId) || rfqs[0];

@@ -30,7 +30,7 @@ export const NotificationCenter: React.FC = () => {
     { id: 'notif-act-5', category: 'activity', boldText: 'A buyer', message: ' bookmarked your product "Jaipur Cotton Block-Print Saree".', time: '3 days ago', read: true, avatarBg: 'bg-rose-100 text-rose-600', avatarChar: '🔖' },
 
     // 2. Business (Transactional Notifications)
-    { id: 'notif-biz-1', category: 'business', boldText: 'New RFQ', message: ' matching your craft is available: "Banarasi Silk Saree (50 pcs)".', time: '10 mins ago', read: false, avatarBg: 'bg-blue-100 text-blue-600', avatarChar: '📋' },
+    { id: 'notif-biz-1', category: 'business', boldText: 'New Custom Order', message: ' matching your craft is available: "Banarasi Silk Saree (50 pcs)".', time: '10 mins ago', read: false, avatarBg: 'bg-blue-100 text-blue-600', avatarChar: '📋' },
     { id: 'notif-biz-2', category: 'business', boldText: 'Your quotation', message: ' has been shortlisted by FabIndia Boutique.', time: '30 mins ago', read: false, avatarBg: 'bg-blue-100 text-blue-600', avatarChar: '🏆' },
     { id: 'notif-biz-3', category: 'business', boldText: 'New order received', message: ' for ORD-944160 (₹13,00,000).', time: '2 hours ago', read: false, avatarBg: 'bg-blue-100 text-blue-600', avatarChar: '🛍️' },
     { id: 'notif-biz-4', category: 'business', boldText: 'Payment credited', message: ' to your wallet: ₹22,500 from last settlement.', time: '1 day ago', read: true, avatarBg: 'bg-blue-100 text-blue-600', avatarChar: '💰' },
@@ -54,7 +54,7 @@ export const NotificationCenter: React.FC = () => {
 
     // 2. Business (Procurement / Sync Notifications)
     { id: 'notif-brand-biz-1', category: 'business', boldText: 'New product added', message: ' by Ramesh Kumar matching your interests: "Maroon Pure Silk Banarasi Saree".', time: '5 mins ago', read: false, avatarBg: 'bg-blue-100 text-blue-600', avatarChar: '🛍️' },
-    { id: 'notif-brand-biz-2', category: 'business', boldText: 'Artisan Ramesh Kumar', message: ' submitted a quote for your RFQ "Banarasi Silk Saree (50 pcs)".', time: '15 mins ago', read: false, avatarBg: 'bg-blue-100 text-blue-600', avatarChar: '📋' },
+    { id: 'notif-brand-biz-2', category: 'business', boldText: 'Artisan Ramesh Kumar', message: ' submitted a quote for your Custom Order "Banarasi Silk Saree (50 pcs)".', time: '15 mins ago', read: false, avatarBg: 'bg-blue-100 text-blue-600', avatarChar: '📋' },
     { id: 'notif-brand-biz-3', category: 'business', boldText: 'Order status updated', message: ' for SS-2505-1023: "Shipped to Hub".', time: '1 hour ago', read: false, avatarBg: 'bg-blue-100 text-blue-600', avatarChar: '🚚' },
     { id: 'notif-brand-biz-4', category: 'business', boldText: 'Escrow payment locked', message: ' successfully for Order ORD-2026-001: ₹2,50,000.', time: '1 day ago', read: true, avatarBg: 'bg-blue-100 text-blue-600', avatarChar: '💰' },
     { id: 'notif-brand-biz-5', category: 'business', boldText: 'Delhi Inspection Hub', message: ' has received your shipment for Order SS-2505-1023.', time: '2 days ago', read: true, avatarBg: 'bg-blue-100 text-blue-600', avatarChar: '🏆' },

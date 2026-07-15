@@ -63,14 +63,14 @@ export const MessagesView: React.FC = () => {
       brandSubtitle: 'A TATA Product',
       avatarChar: 'RK',
       avatarBg: 'bg-[#6A0DAD] text-white', // Purple
-      tagline: 'RFQ-1 • Kadwa Banarasi Weaving (100 PCS)',
+      tagline: 'Custom-1 • Kadwa Banarasi Weaving (100 PCS)',
       lastMessage: 'I can deliver the Kadwa sarees in 45 days as requested.',
       time: '10:30 AM',
       unreadCount: 2,
       unread: true,
       archived: false,
       messages: [
-        { id: 'm1', sender: 'brand', text: 'Hi, we saw your quote on the Kadwa Banarasi RFQ. Can you deliver by August 15th?', timestamp: 'Yesterday' },
+        { id: 'm1', sender: 'brand', text: 'Hi, we saw your quote on the Kadwa Banarasi Custom Order. Can you deliver by August 15th?', timestamp: 'Yesterday' },
         { id: 'm2', sender: 'artisan', text: 'Namaste, yes. I can deliver the Kadwa sarees in 45 days as requested. The gold zari borders will be hand-woven.', timestamp: '10:30 AM' }
       ]
     },
@@ -82,7 +82,7 @@ export const MessagesView: React.FC = () => {
       brandSubtitle: 'Celebrate India',
       avatarChar: 'NP',
       avatarBg: 'bg-[#C23B22] text-white', // Red
-      tagline: 'RFQ-1 • Bhuj Organic Dyes',
+      tagline: 'Custom-1 • Bhuj Organic Dyes',
       lastMessage: 'Will use organic Bhuj dyes for the traditional print blocks.',
       time: 'Yesterday',
       unreadCount: 1,
@@ -101,7 +101,7 @@ export const MessagesView: React.FC = () => {
       brandSubtitle: 'Ethnic. Authentic. You.',
       avatarChar: 'SK',
       avatarBg: 'bg-[#008080] text-white', // Teal
-      tagline: 'RFQ-2 • Chanderi Silk Saree (50 PCS)',
+      tagline: 'Custom-2 • Chanderi Silk Saree (50 PCS)',
       lastMessage: 'The chanderi dupattas have delicate gold cutwork details.',
       time: 'Yesterday',
       unreadCount: 1,
@@ -120,7 +120,7 @@ export const MessagesView: React.FC = () => {
       brandSubtitle: 'Modern Traditional',
       avatarChar: 'AV',
       avatarBg: 'bg-[#D2691E] text-white', // Brownish Orange
-      tagline: 'RFQ-3 • Hand Block Printed Fabric',
+      tagline: 'Custom-3 • Hand Block Printed Fabric',
       lastMessage: 'Vegetable block printing is ready. Checking color fastness now.',
       time: '2 days ago',
       unreadCount: 0,
@@ -139,7 +139,7 @@ export const MessagesView: React.FC = () => {
       brandSubtitle: 'Heritage luxury',
       avatarChar: 'PS',
       avatarBg: 'bg-[#4169E1] text-white', // Royal Blue
-      tagline: 'RFQ-2 • Pure Linen Fabric',
+      tagline: 'Custom-2 • Pure Linen Fabric',
       lastMessage: 'Organic flax linen is source-verified. Looms are active.',
       time: '2 days ago',
       unreadCount: 0,
@@ -158,7 +158,7 @@ export const MessagesView: React.FC = () => {
       brandSubtitle: 'Celebrate Craftsmanship',
       avatarChar: 'MG',
       avatarBg: 'bg-[#9370DB] text-white', // Light Purple
-      tagline: 'RFQ-4 • Maheshwari Saree (75 PCS)',
+      tagline: 'Custom-4 • Maheshwari Saree (75 PCS)',
       lastMessage: 'Silk borders are double-wefted for extra sheen.',
       time: '3 days ago',
       unreadCount: 0,
@@ -177,7 +177,7 @@ export const MessagesView: React.FC = () => {
       brandSubtitle: 'Artisanal Wear',
       avatarChar: 'AK',
       avatarBg: 'bg-[#1E5631] text-white', // Forest Green
-      tagline: 'RFQ-3 • Indigo Dyed Fabric',
+      tagline: 'Custom-3 • Indigo Dyed Fabric',
       lastMessage: 'Looms are prepped for 200 meters of raw indigo fabric.',
       time: '3 days ago',
       unreadCount: 0,
@@ -196,7 +196,7 @@ export const MessagesView: React.FC = () => {
       brandSubtitle: 'Premium Sourcing',
       avatarChar: 'VS',
       avatarBg: 'bg-[#DB7093] text-white', // Pale Red Violet
-      tagline: 'RFQ-1 • Pashmina Stole (30 PCS)',
+      tagline: 'Custom-1 • Pashmina Stole (30 PCS)',
       lastMessage: 'Kashmir pashmina wool spinning is complete. Hand-embroidery started.',
       time: '4 days ago',
       unreadCount: 0,
@@ -215,7 +215,7 @@ export const MessagesView: React.FC = () => {
       brandSubtitle: 'Eco Traditional',
       avatarChar: 'HB',
       avatarBg: 'bg-[#8B5A2B] text-white', // Brown
-      tagline: 'RFQ-2 • Jute Bags (200 PCS)',
+      tagline: 'Custom-2 • Jute Bags (200 PCS)',
       lastMessage: 'Braided jute handles are reinforced with double stitches.',
       time: '5 days ago',
       unreadCount: 0,
@@ -234,7 +234,7 @@ export const MessagesView: React.FC = () => {
       brandSubtitle: 'Sourcing Hub',
       avatarChar: 'LD',
       avatarBg: 'bg-[#008B8B] text-white', // Dark Cyan
-      tagline: 'RFQ-4 • Hand Embroidered Dupatta',
+      tagline: 'Custom-4 • Hand Embroidered Dupatta',
       lastMessage: 'Madhubani border borders are painted using natural colors.',
       time: '5 days ago',
       unreadCount: 0,
@@ -295,14 +295,14 @@ export const MessagesView: React.FC = () => {
               brandSubtitle: 'Buyer Brand',
               avatarChar: bid.brandName.substring(0, 2).toUpperCase(),
               avatarBg: 'bg-[#FF6B35] text-white',
-              tagline: `RFQ • ${bid.productName}`,
+              tagline: `Custom • ${bid.productName}`,
               lastMessage: newMsg.text,
               time: newMsg.timestamp,
               unreadCount: 1,
               unread: true,
               archived: false,
               messages: [
-                { id: `bid-brand-msg-${bid.id}`, sender: 'brand', text: `Regarding RFQ for ${bid.productName}: We look forward to your offer.`, timestamp: 'Yesterday' },
+                { id: `bid-brand-msg-${bid.id}`, sender: 'brand', text: `Regarding Custom Order for ${bid.productName}: We look forward to your offer.`, timestamp: 'Yesterday' },
                 newMsg
               ]
             };
@@ -439,7 +439,7 @@ export const MessagesView: React.FC = () => {
                 <div>
                   <h2 className="font-heading font-black text-xl text-stone-850">Messages</h2>
                   <span className="text-[10px] text-text-secondary font-bold block mt-0.5">
-                    Negotiate and comment on RFQ bulk orders
+                    Negotiate and comment on Custom bulk orders
                   </span>
                 </div>
               </div>

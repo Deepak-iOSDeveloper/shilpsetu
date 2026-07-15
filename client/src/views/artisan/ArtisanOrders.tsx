@@ -153,7 +153,7 @@ export const ArtisanOrders: React.FC = () => {
                 : 'text-text-secondary hover:text-text-primary'
             }`}
           >
-            RFQ Bulk Orders
+            Custom Bulk Orders
           </button>
         </div>
 
