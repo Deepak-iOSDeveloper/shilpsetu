@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { 
-  User, UserRole, ArtisanProfile, BrandProfile, Product, 
-  RFQ, RFQQuote, Order, OrderStatus, Wallet, Notification, Transaction 
+import {
+  User, UserRole, ArtisanProfile, BrandProfile, Product, ProductDraft,
+  RFQ, RFQQuote, Order, OrderStatus, Wallet, Notification, Transaction
 } from '../types';
 import { supabase, isSupabaseConfigured } from '../supabase/supabaseClient';
 
@@ -28,6 +28,7 @@ interface AppContextType {
   // Commerce & Core DB
   products: Product[];
   newlyAddedProductIds: string[];
+  drafts: ProductDraft[];
   rfqs: RFQ[];
   orders: Order[];
   wallets: Record<string, Wallet>;
@@ -35,8 +36,11 @@ interface AppContextType {
   
   // Actions
   addProduct: (product: Omit<Product, 'id' | 'ownerId' | 'sku' | 'status'>) => Promise<{ success: boolean; error?: string }>;
+  addDraft: (draft: Omit<ProductDraft, 'id' | 'ownerId' | 'savedAt'>) => void;
+  removeDraft: (id: string) => void;
   updateProductStock: (id: string, qty: number) => void;
   updateProduct: (id: string, updatedFields: Partial<Product>) => void;
+  deleteProduct: (id: string) => void;
   createRFQ: (rfqData: Omit<RFQ, 'id' | 'brandId' | 'brandName' | 'quotes' | 'status'>) => void;
   submitQuote: (rfqId: string, quote: Omit<RFQQuote, 'status'>) => void;
   acceptQuote: (rfqId: string, artisanId: string) => void;
@@ -178,6 +182,85 @@ const defaultProducts: Product[] = [
     sku: 'BS006',
     status: 'inStock',
     aiGenerated: false
+  },
+  {
+    id: 'p-10',
+    ownerId: 'artisan-1',
+    name: 'Vibrant Blue Pure Organza Silk Banarasi Saree',
+    category: 'Textiles',
+    craftType: 'Organza Banarasi Weaving',
+    material: 'Pure Organza Silk',
+    price: 48000,
+    stockQty: 8,
+    weight: 600,
+    description: 'Vibrant blue pure organza silk Banarasi saree with intricate handwoven zari work, sourced directly from FabIndia Boutique bespoke orders.',
+    images: ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600'],
+    sku: 'BS010',
+    status: 'inStock',
+    aiGenerated: false
+  },
+  {
+    id: 'p-12',
+    ownerId: 'artisan-2',
+    name: 'Chanderi Handwoven Zari Motif Saree',
+    category: 'Textiles',
+    craftType: 'Chanderi Handloom',
+    material: 'Chanderi Silk Cotton',
+    price: 16500,
+    stockQty: 14,
+    weight: 400,
+    description: 'Handwoven Chanderi saree featuring traditional zari motifs, crafted by artisans in Bhuj, Gujarat.',
+    images: ['https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?w=600'],
+    sku: 'BS012',
+    status: 'inStock',
+    aiGenerated: false
+  },
+  {
+    id: 'p-13',
+    ownerId: 'artisan-2',
+    name: 'Chanderi Silk Buti Saree (Festive Collection)',
+    category: 'Textiles',
+    craftType: 'Chanderi Handloom',
+    material: 'Chanderi Silk',
+    price: 9500,
+    stockQty: 32,
+    weight: 380,
+    description: 'Festive collection Chanderi silk saree with delicate buti weaving, produced for bulk custom orders.',
+    images: ['https://images.unsplash.com/photo-1544816155-12df9643f363?w=600'],
+    sku: 'BS013',
+    status: 'inStock',
+    aiGenerated: false
+  }
+];
+
+const defaultDrafts: ProductDraft[] = [
+  {
+    id: 'draft-1',
+    ownerId: 'artisan-1',
+    name: 'Kutch Embroidery Wall Hanging',
+    category: 'Home Decor',
+    craftType: 'Kutch Hand Embroidery',
+    material: 'Cotton & Mirror Work',
+    price: 1450,
+    stockQty: 6,
+    weight: 300,
+    description: 'Vibrant hand-embroidered wall hanging featuring traditional Kutch mirror work. Details and pricing still being finalized.',
+    images: ['https://images.unsplash.com/photo-1581781870027-04212e231e96?w=600'],
+    savedAt: '2026-07-10T10:00:00Z'
+  },
+  {
+    id: 'draft-2',
+    ownerId: 'artisan-1',
+    name: 'Chikankari Cotton Kurta',
+    category: 'Apparel',
+    craftType: 'Lucknowi Chikankari',
+    material: 'Georgette Cotton',
+    price: 0,
+    stockQty: 0,
+    weight: 400,
+    description: 'Hand-embroidered Chikankari kurta with shadow-work detailing. Needs final photos and pricing before publishing.',
+    images: ['https://images.unsplash.com/photo-1544816155-12df9643f363?w=600'],
+    savedAt: '2026-07-12T14:30:00Z'
   }
 ];
 
@@ -914,6 +997,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // DB States (Local Mirror)
   const [products, setProducts] = useState<Product[]>(defaultProducts);
   const [newlyAddedProductIds, setNewlyAddedProductIds] = useState<string[]>([]);
+  const [drafts, setDrafts] = useState<ProductDraft[]>(defaultDrafts);
   const [rfqs, setRfqs] = useState<RFQ[]>(defaultRfqs);
   const [orders, setOrders] = useState<Order[]>(defaultOrders);
   const [wallets, setWallets] = useState<Record<string, Wallet>>(defaultWallets);
@@ -934,95 +1018,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [onboardingData, setOnboardingData] = useState<any>({});
   const [aiAutofillData, setAiAutofillData] = useState<any>(null);
 
-  // Sync state from server on startup if reachable, else use seed data
+  // Sync state from server on startup if reachable, else use seed data.
+  // NOTE: products/orders are kept on the local hardcoded seed data (defaultProducts/
+  // defaultOrders) for demo purposes — live Supabase/Express sync for these two is
+  // intentionally skipped below so the demo data always renders. RFQs and wallet sync
+  // are left untouched.
   useEffect(() => {
     const fetchServerState = async () => {
-      let syncedFromSupabase = false;
-      // 1. Sync from Supabase database tables if configured
       if (isSupabaseConfigured()) {
         try {
-          console.log("Shilp Setu: Fetching state from live Supabase database...");
-          
-          // Fetch Products
-          const { data: dbProds, error: pErr } = await supabase.from('products').select('*');
-          if (!pErr && dbProds && dbProds.length > 0) {
-            const mappedProds: Product[] = dbProds.map((p: any) => ({
-              id: p.id,
-              ownerId: p.artisan_id,
-              name: p.name,
-              category: p.category,
-              craftType: p.craft_type,
-              material: 'Organic Material',
-              price: Number(p.price),
-              stockQty: p.stock,
-              weight: 500,
-              description: p.description || '',
-              images: p.images || ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600'],
-              sku: 'SKU-' + p.id.slice(0, 5).toUpperCase(),
-              status: p.stock > 5 ? 'inStock' : (p.stock > 0 ? 'lowStock' : 'outOfStock'),
-              aiGenerated: false
-            }));
-            setProducts(mappedProds);
-            syncedFromSupabase = true;
-          }
-
-          // Fetch Orders
-          const { data: dbOrders, error: oErr } = await supabase.from('orders').select('*');
-          if (!oErr && dbOrders && dbOrders.length > 0) {
-            const mappedOrders: Order[] = dbOrders.map((o: any) => ({
-              id: o.id,
-              buyerId: o.brand_id,
-              buyerName: 'Fabindia Boutique',
-              sellerId: o.artisan_id,
-              sellerName: 'Ramesh Kumar',
-              sellerLocation: 'Varanasi, UP',
-              items: [
-                {
-                  productId: 'db-item',
-                  name: 'Procured Saree / Craft item',
-                  price: Number(o.total_amount) / o.quantity,
-                  qty: o.quantity,
-                  image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400'
-                }
-              ],
-              qty: o.quantity,
-              amount: Number(o.total_amount),
-              status: o.status,
-              statusHistory: [{ status: o.status, timestamp: o.created_at }],
-              deliveryDate: '28 Aug, 2026',
-              type: o.order_type === 'direct_retail' ? 'customer' : 'RFQ',
-              createdAt: o.created_at,
-              awb: o.awb_tracking_id || undefined
-            }));
-            setOrders(mappedOrders);
-            syncedFromSupabase = true;
-          }
+          console.log("Shilp Setu: Demo mode active — skipping live Supabase products/orders sync.");
         } catch (se) {
           console.warn("Supabase database fetch error, falling back to seed arrays:", se);
         }
       }
 
-      // 2. Fallback to Express mock backend endpoints if not loaded from Supabase
-      if (!syncedFromSupabase) {
-        try {
-          const prodRes = await fetch(`${API_BASE}/products`);
-          if (prodRes.ok) {
-            const data = await prodRes.json();
-            if (data && data.length > 0) setProducts(data);
-          }
-          const rfqRes = await fetch(`${API_BASE}/rfqs`);
-          if (rfqRes.ok) {
-            const data = await rfqRes.json();
-            if (data && data.length > 0) setRfqs(data);
-          }
-          const ordRes = await fetch(`${API_BASE}/orders`);
-          if (ordRes.ok) {
-            const data = await ordRes.json();
-            if (data && data.length > 0) setOrders(data);
-          }
-        } catch (err) {
-          console.warn("Express Server not running. Running in browser-local prototype state.");
+      // Fallback to Express mock backend for RFQs only
+      try {
+        const rfqRes = await fetch(`${API_BASE}/rfqs`);
+        if (rfqRes.ok) {
+          const data = await rfqRes.json();
+          if (data && data.length > 0) setRfqs(data);
         }
+      } catch (err) {
+        console.warn("Express Server not running. Running in browser-local prototype state.");
       }
     };
     fetchServerState();
@@ -1033,71 +1052,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     
     try {
       console.log(`ShilpSetu: Fetching personal database records for ${role} (ID: ${userId})...`);
-      
-      // 1. Fetch Products
-      let productQuery = supabase.from('products').select('*');
-      if (role === 'ARTISAN') {
-        productQuery = productQuery.eq('artisan_id', userId);
-      }
-      const { data: dbProds, error: pErr } = await productQuery;
-      if (!pErr && dbProds) {
-        const mappedProds: Product[] = dbProds.map((p: any) => ({
-          id: p.id,
-          ownerId: p.artisan_id,
-          name: p.name,
-          category: p.category,
-          craftType: p.craft_type,
-          material: 'Organic Material',
-          price: Number(p.price),
-          stockQty: p.stock,
-          weight: 500,
-          description: p.description || '',
-          images: p.images || ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=600'],
-          sku: 'SKU-' + p.id.slice(0, 5).toUpperCase(),
-          status: p.stock > 5 ? 'inStock' : (p.stock > 0 ? 'lowStock' : 'outOfStock'),
-          aiGenerated: false
-        }));
-        setProducts(mappedProds);
-      }
 
-      // 2. Fetch Orders
-      let orderQuery = supabase.from('orders').select('*');
-      if (role === 'ARTISAN') {
-        orderQuery = orderQuery.eq('artisan_id', userId);
-      } else {
-        orderQuery = orderQuery.eq('brand_id', userId);
-      }
-      const { data: dbOrders, error: oErr } = await orderQuery;
-      if (!oErr && dbOrders) {
-        const mappedOrders: Order[] = dbOrders.map((o: any) => ({
-          id: o.id,
-          buyerId: o.brand_id,
-          buyerName: 'Fabindia Boutique',
-          sellerId: o.artisan_id,
-          sellerName: 'Ramesh Kumar',
-          sellerLocation: 'Varanasi, UP',
-          items: [
-            {
-              productId: 'db-item',
-              name: 'Procured Saree / Craft item',
-              price: Number(o.total_amount) / o.quantity,
-              qty: o.quantity,
-              image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400'
-            }
-          ],
-          qty: o.quantity,
-          amount: Number(o.total_amount),
-          status: o.status,
-          statusHistory: [{ status: o.status, timestamp: o.created_at }],
-          deliveryDate: '28 Aug, 2026',
-          type: o.order_type === 'direct_retail' ? 'customer' : 'RFQ',
-          createdAt: o.created_at,
-          awb: o.awb_tracking_id || undefined
-        }));
-        setOrders(mappedOrders);
-      }
+      // Products & orders are intentionally left on the local hardcoded seed data for
+      // demo purposes (see fetchServerState above) — personal DB sync for those two is skipped here.
 
-      // 3. Fetch Wallet Balance
+      // Fetch Wallet Balance
       const { data: walletData, error: wErr } = await supabase
         .from('wallet_balances')
         .select('balance')
@@ -1619,6 +1578,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { success: true };
   };
 
+  const addDraft = (draftData: Omit<ProductDraft, 'id' | 'ownerId' | 'savedAt'>) => {
+    const newDraft: ProductDraft = {
+      ...draftData,
+      id: 'draft-' + Date.now(),
+      ownerId: currentUser?.uid || 'artisan-1',
+      savedAt: new Date().toISOString()
+    };
+    setDrafts(prev => [newDraft, ...prev]);
+  };
+
+  const removeDraft = (id: string) => {
+    setDrafts(prev => prev.filter(d => d.id !== id));
+  };
+
   const updateProductStock = (id: string, qty: number) => {
     setProducts(prev => prev.map(p => {
       if (p.id === id) {
@@ -1692,6 +1665,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     }
+  };
+
+  const deleteProduct = (id: string) => {
+    setProducts(prev => prev.filter(p => p.id !== id));
+    setNewlyAddedProductIds(prev => prev.filter(pid => pid !== id));
+
+    // Supabase DB Sync
+    if (isSupabaseConfigured()) {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (uuidRegex.test(id)) {
+        try {
+          supabase.from('products')
+            .delete()
+            .eq('id', id)
+            .then(({ error }) => {
+              if (error) console.error("Supabase product delete failed:", error.message);
+              else console.log("ShilpSetu: Product deleted in Supabase!");
+            });
+        } catch (err) {
+          console.error("Supabase product delete exception:", err);
+        }
+      }
+    }
+
+    // Backend delete (fire-and-forget: local state is already updated above)
+    fetch(`${API_BASE}/products/${id}`, { method: 'DELETE' }).catch(() => {
+      console.warn("Express endpoint offline, deleted locally.");
+    });
   };
 
   const createRFQ = async (rfqData: Omit<RFQ, 'id' | 'brandId' | 'brandName' | 'quotes' | 'status'>) => {
@@ -2265,14 +2266,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
       products,
       newlyAddedProductIds,
+      drafts,
       rfqs,
       orders,
       wallets,
       notifications,
-      
+
       addProduct,
+      addDraft,
+      removeDraft,
       updateProductStock,
       updateProduct,
+      deleteProduct,
       createRFQ,
       submitQuote,
       acceptQuote,

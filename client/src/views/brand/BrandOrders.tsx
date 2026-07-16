@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Card } from '../../components/Card';
 import { StatusPill } from '../../components/StatusPill';
-import { 
-  ChevronLeft, Search, Filter, RefreshCw, 
-  MapPin, CheckCircle, Clock, AlertTriangle 
+import {
+  ChevronLeft, Search, Filter, RefreshCw,
+  MapPin, CheckCircle, Clock, AlertTriangle, User, Tag
 } from 'lucide-react';
 
 export const BrandOrders: React.FC = () => {
-  const { orders, setCurrentView } = useApp();
+  const { orders, products, setCurrentView } = useApp();
   const [activeTab, setActiveTab] = useState<'customer' | 'RFQ'>('customer');
   const [search, setSearch] = useState('');
 
@@ -98,10 +98,12 @@ export const BrandOrders: React.FC = () => {
         <div className="flex flex-col gap-4">
           {filteredOrders.map(order => {
             const currentIdx = pipelineSteps.findIndex(s => s.id === order.status);
-            
+            const item = order.items[0];
+            const product = item ? products.find(p => p.id === item.productId) : undefined;
+
             return (
-              <Card 
-                key={order.id} 
+              <Card
+                key={order.id}
                 padding="md"
                 className="border border-primary/5 hover:border-primary/20 flex flex-col gap-4"
               >
@@ -109,24 +111,37 @@ export const BrandOrders: React.FC = () => {
                 <div className="flex justify-between items-start gap-1">
                   <div className="flex items-center gap-2">
                     <div className="w-10 h-10 rounded-xl overflow-hidden bg-stone-100 shrink-0">
-                      <img src={order.items[0]?.image} className="w-full h-full object-cover" />
+                      <img src={item?.image} className="w-full h-full object-cover" />
                     </div>
                     <div>
                       <span className="text-[9px] font-extrabold uppercase bg-stone-100 text-text-secondary px-1.5 py-0.5 rounded">
                         {order.id}
                       </span>
                       <h4 className="text-xs font-bold text-text-primary mt-1 truncate max-w-[180px]">
-                        {order.items[0]?.name}
+                        {item?.name}
                       </h4>
+                      {item?.productId && (
+                        <span className="flex items-center gap-1 text-[9px] text-text-secondary font-bold mt-0.5">
+                          <Tag className="w-3 h-3 text-stone-400" />
+                          Product ID: {item.productId}
+                        </span>
+                      )}
                     </div>
                   </div>
 
                   <div className="text-right flex flex-col items-end gap-1">
                     <StatusPill status={order.status} />
+                    {product && <StatusPill status={product.status} />}
                     <span className="text-[10px] font-bold text-text-primary">
-                      ₹{order.amount.toLocaleString('en-IN')}
+                      ₹{(item?.price ?? order.amount).toLocaleString('en-IN')}
                     </span>
                   </div>
+                </div>
+
+                {/* Buyer */}
+                <div className="flex items-center gap-1.5 text-[10px] font-bold text-text-secondary -mt-2">
+                  <User className="w-3.5 h-3.5 text-stone-400" />
+                  <span>Buyer: {order.buyerName}</span>
                 </div>
 
                 {/* Artisan mini profile */}
@@ -140,6 +155,8 @@ export const BrandOrders: React.FC = () => {
                     <MapPin className="w-3 h-3 text-stone-400" />
                     <span>{order.sellerLocation}</span>
                   </div>
+                  <span>•</span>
+                  <span>Qty: {order.qty}</span>
                 </div>
 
                 {/* Expected delivery */}

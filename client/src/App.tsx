@@ -12,6 +12,7 @@ import { Login } from './views/onboarding/Login';
 // Artisan Views
 import { ArtisanDashboard } from './views/artisan/ArtisanDashboard';
 import { AddProductAI } from './views/artisan/AddProductAI';
+import { DraftsList } from './views/artisan/DraftsList';
 import { ScanSell } from './views/artisan/ScanSell';
 import { InventoryList } from './views/artisan/InventoryList';
 import { ArtisanOrders } from './views/artisan/ArtisanOrders';
@@ -61,6 +62,8 @@ const AppContent: React.FC = () => {
         return <ArtisanDashboard />;
       case 'add-product':
         return <AddProductAI />;
+      case 'drafts':
+        return <DraftsList />;
       case 'scan-sell':
         return <ScanSell />;
       case 'inventory':

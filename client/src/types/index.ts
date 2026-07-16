@@ -57,6 +57,21 @@ export interface Product {
   aiGenerated: boolean;
 }
 
+export interface ProductDraft {
+  id: string;
+  ownerId: string;
+  name: string;
+  category: string;
+  craftType: string;
+  material: string;
+  price: number;
+  stockQty: number;
+  weight: number;
+  description: string;
+  images: string[];
+  savedAt: string;
+}
+
 export interface InventoryItem {
   sku: string;
   qty: number;

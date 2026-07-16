@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Card } from '../../components/Card';
-import { 
-  ChevronLeft, Search, Calendar, Globe, AlertCircle, 
-  ChevronRight, Check, X, ShieldAlert, ShoppingBag, 
-  CheckCircle, Package, Truck, Info, Settings
+import { StatusPill } from '../../components/StatusPill';
+import {
+  ChevronLeft, Search, Calendar, AlertCircle,
+  ChevronRight, Check, X, ShieldAlert, ShoppingBag,
+  CheckCircle, Package, Truck, Info, Settings, User, Tag
 } from 'lucide-react';
 
 // Custom Pot silhouette icon for Processing
@@ -17,7 +18,7 @@ const PotIcon = ({ className }: { className?: string }) => (
 );
 
 export const ArtisanOrders: React.FC = () => {
-  const { orders, updateOrderStatus, setCurrentView } = useApp();
+  const { orders, products, updateOrderStatus, setCurrentView } = useApp();
   
   // Tab: Direct Retail vs RFQ Bulk Orders
   const [activeTab, setActiveTab] = useState<'Direct Retail' | 'RFQ Bulk Orders'>('Direct Retail');
@@ -239,45 +240,63 @@ export const ArtisanOrders: React.FC = () => {
       <div className="px-4 flex flex-col gap-4 overflow-y-auto no-scrollbar max-h-[calc(100vh-325px)]">
         {filteredOrders.map((order) => {
           const item = order.items && order.items[0];
-          
+          const product = item ? products.find(p => p.id === item.productId) : undefined;
+
           return (
-            <Card 
-              key={order.id} 
-              padding="none" 
+            <Card
+              key={order.id}
+              padding="none"
               className="bg-white rounded-3xl border border-primary/5 shadow-premium flex flex-col overflow-hidden hover:border-primary/20 transition-all select-none"
             >
               <div className="p-4 flex gap-4">
                 {/* Left side: Product Image */}
                 <div className="w-16 aspect-[4/5] rounded-2xl overflow-hidden bg-stone-100 border border-stone-200 shrink-0">
-                  <img 
-                    src={item?.image || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=150'} 
-                    alt={item?.name || 'Banarasi Saree'} 
-                    className="w-full h-full object-cover" 
+                  <img
+                    src={item?.image || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=150'}
+                    alt={item?.name || 'Banarasi Saree'}
+                    className="w-full h-full object-cover"
                   />
                 </div>
 
                 {/* Right side: details */}
-                <div className="flex-1 min-w-0 flex flex-col justify-between">
+                <div className="flex-1 min-w-0 flex flex-col justify-between gap-1.5">
                   <div className="flex justify-between items-start gap-1">
                     <span className="text-[10px] font-black text-[#B3562C] truncate">
                       Order ID: {order.id}
                     </span>
-                    
-                    <div className="flex items-center gap-1 text-[9px] text-text-secondary font-bold shrink-0 bg-stone-50 border border-stone-200/50 px-2 py-0.5 rounded">
-                      <Globe className="w-3 h-3 text-stone-400" />
-                      <span>Brand Website</span>
-                    </div>
+
+                    {product && (
+                      <StatusPill status={product.status} />
+                    )}
                   </div>
 
-                  <h3 className="text-xs font-black text-stone-850 leading-tight mt-1 truncate">
-                    {item?.name || 'Banarasi Saree'}
-                  </h3>
+                  <div>
+                    <h3 className="text-xs font-black text-stone-850 leading-tight truncate">
+                      {item?.name || 'Banarasi Saree'}
+                    </h3>
+                    {item?.productId && (
+                      <span className="flex items-center gap-1 text-[9px] text-text-secondary font-bold mt-0.5">
+                        <Tag className="w-3 h-3 text-stone-400" />
+                        Product ID: {item.productId}
+                      </span>
+                    )}
+                  </div>
 
-                  <span className="text-[10px] text-text-secondary font-bold block mt-1 leading-none">
+                  <div className="flex items-center justify-between text-[10px] font-bold">
+                    <span className="flex items-center gap-1 text-text-secondary">
+                      <User className="w-3.5 h-3.5 text-stone-400" />
+                      {order.buyerName}
+                    </span>
+                    <span className="text-[#FF511A] font-black">
+                      ₹{(item?.price ?? order.amount).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+
+                  <span className="text-[10px] text-text-secondary font-bold block leading-none">
                     Qty: {order.qty} pieces
                   </span>
 
-                  <div className="flex justify-between items-center mt-2.5">
+                  <div className="flex justify-between items-center mt-1">
                     <div className="flex items-center gap-1.5 text-[9px] text-text-secondary font-extrabold">
                       <Calendar className="w-3.5 h-3.5 text-stone-450" />
                       <span>Delivery: {order.deliveryDate}</span>

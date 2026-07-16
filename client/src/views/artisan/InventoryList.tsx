@@ -4,12 +4,12 @@ import { Card } from '../../components/Card';
 import { StatusPill } from '../../components/StatusPill';
 import {
   ChevronLeft, Package, Search, Plus,
-  Upload, ChevronRight, AlertCircle, Edit3, Save, X, Camera, BookmarkCheck
+  Upload, ChevronRight, AlertCircle, Edit3, Save, X, Camera, BookmarkCheck, Trash2
 } from 'lucide-react';
 import { Product } from '../../types';
 
 export const InventoryList: React.FC = () => {
-  const { products, newlyAddedProductIds, updateProductStock, updateProduct, setCurrentView } = useApp();
+  const { products, newlyAddedProductIds, updateProductStock, updateProduct, deleteProduct, setCurrentView } = useApp();
   const [search, setSearch] = useState('');
   const [showSavedOnly, setShowSavedOnly] = useState(false);
 
@@ -102,6 +102,13 @@ export const InventoryList: React.FC = () => {
 
     setIsEditing(false);
     alert("Product details updated successfully!");
+  };
+
+  const handleDeleteProduct = (product: Product) => {
+    const confirmed = window.confirm(`Delete "${product.name}"? This cannot be undone.`);
+    if (!confirmed) return;
+    deleteProduct(product.id);
+    setSelectedProduct(null);
   };
 
   // ==========================================
@@ -368,14 +375,23 @@ export const InventoryList: React.FC = () => {
             </div>
           </div>
 
-          {/* Edit Button at the end */}
-          <button
-            onClick={() => setIsEditing(true)}
-            className="w-full mt-2 mb-8 py-4 bg-[#FF511A] hover:bg-[#E04413] text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-[#FF511A]/10 active:scale-98"
-          >
-            <Edit3 className="w-4.5 h-4.5" />
-            <span>Edit Product</span>
-          </button>
+          {/* Edit & Delete Buttons at the end */}
+          <div className="flex gap-3 mt-2 mb-8">
+            <button
+              onClick={() => setIsEditing(true)}
+              className="flex-1 py-4 bg-[#FF511A] hover:bg-[#E04413] text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-[#FF511A]/10 active:scale-98"
+            >
+              <Edit3 className="w-4.5 h-4.5" />
+              <span>Edit Product</span>
+            </button>
+            <button
+              onClick={() => handleDeleteProduct(selectedProduct)}
+              className="w-14 shrink-0 py-4 bg-white border border-red-200 hover:bg-red-50 text-red-500 rounded-2xl flex items-center justify-center transition-all active:scale-98"
+              aria-label="Delete product"
+            >
+              <Trash2 className="w-4.5 h-4.5" />
+            </button>
+          </div>
 
         </div>
       </div>
@@ -476,6 +492,17 @@ export const InventoryList: React.FC = () => {
                     <span>Stock: <span className="text-[#FF511A] font-black">{product.stockQty} pcs</span> (Tap to edit)</span>
                   </button>
                 </div>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation(); // prevent opening details
+                    handleDeleteProduct(product);
+                  }}
+                  className="w-7 h-7 rounded-lg border border-stone-200 hover:border-red-200 hover:bg-red-50 flex items-center justify-center text-stone-400 hover:text-red-500 shrink-0 transition-all"
+                  aria-label="Delete product"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
 
                 <ChevronRight className="w-4 h-4 text-stone-400 shrink-0" />
               </Card>

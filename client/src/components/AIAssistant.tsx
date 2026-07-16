@@ -165,44 +165,62 @@ export const AIAssistant: React.FC = () => {
   const processCommand = async (query: string) => {
     const text = query.toLowerCase();
     let replyText = "";
-    
+
+    // Word-boundary aware matcher: avoids "order" false-matching inside
+    // unrelated words/transcripts (e.g. "reorder", "border") the way a
+    // plain .includes('order') substring check would.
+    const hasWord = (source: string, word: string) => new RegExp(`\\b${word}\\b`, 'i').test(source);
+
+    const isWalletQuery = (t: string) =>
+      hasWord(t, 'balance') || hasWord(t, 'money') || hasWord(t, 'wallet') ||
+      hasWord(t, 'paise') || hasWord(t, 'paisa') || hasWord(t, 'earning') || hasWord(t, 'earnings') ||
+      t.includes('कमाई') || t.includes('वॉलेट') || t.includes('बैलेंस') || t.includes('खाता') || t.includes('पैसा') || t.includes('पैसे');
+
+    const isOrderQuery = (t: string) =>
+      hasWord(t, 'orders?') || hasWord(t, 'sourcing') || hasWord(t, 'delivery') ||
+      t.includes('ऑर्डर') || t.includes('डिलीवरी') || t.includes('ग्राहक');
+
     // 1. Navigation intents
     if (text.includes('go to') || text.includes('open') || text.includes('kholo') || text.includes('screen')) {
       if (text.includes('inventory') || text.includes('stock') || text.includes('maal') || text.includes('product')) {
         setCurrentView('inventory');
-        replyText = language === 'hi' 
-          ? "Maine aapka Inventory page khol diya hai." 
+        replyText = language === 'hi'
+          ? "Maine aapka Inventory page khol diya hai."
           : "Opened your Inventory screen.";
       } else if (text.includes('add product') || text.includes('naya product') || text.includes('joch')) {
         setCurrentView('add-product');
-        replyText = language === 'hi' 
-          ? "Naya product add karne ki screen khol di gayi hai." 
+        replyText = language === 'hi'
+          ? "Naya product add karne ki screen khol di gayi hai."
           : "Opened the Add Product screen.";
-      } else if (text.includes('orders') || text.includes('order')) {
+      }
+      // Wallet/balance is checked BEFORE orders here: a spoken command that
+      // mentions both (e.g. mixed/garbled transcripts) should still resolve
+      // to the more specific Wallet destination rather than Orders.
+      else if (isWalletQuery(text)) {
+        setCurrentView('balance');
+        replyText = language === 'hi'
+          ? "Maine aapka Wallet aur Earnings screen khol diya hai."
+          : "Opened your Wallet & Earnings ledger screen.";
+      } else if (isOrderQuery(text)) {
         setCurrentView('orders');
-        replyText = language === 'hi' 
-          ? "Maine aapke Sourcing aur Retail Orders ki list khol di hai." 
+        replyText = language === 'hi'
+          ? "Maine aapke Sourcing aur Retail Orders ki list khol di hai."
           : "Opened your Orders tab.";
       } else if (text.includes('community') || text.includes('feed') || text.includes('post')) {
         setCurrentView('community');
-        replyText = language === 'hi' 
-          ? "ShilpSetu Community feed pe aapka swagat hai!" 
+        replyText = language === 'hi'
+          ? "ShilpSetu Community feed pe aapka swagat hai!"
           : "Welcome to the ShilpSetu Community feed!";
       } else if (text.includes('dashboard') || text.includes('home') || text.includes('main')) {
         setCurrentView('dashboard');
-        replyText = language === 'hi' 
-          ? "Maine aapka Home Dashboard khol diya hai." 
+        replyText = language === 'hi'
+          ? "Maine aapka Home Dashboard khol diya hai."
           : "Navigated to your Home Dashboard.";
       } else if (text.includes('store') || text.includes('website') || text.includes('storefront')) {
         setCurrentView('storefront');
-        replyText = language === 'hi' 
-          ? "Aapka Online Storefront Builder khol diya gaya hai." 
+        replyText = language === 'hi'
+          ? "Aapka Online Storefront Builder khol diya gaya hai."
           : "Navigated to your Online Storefront Builder.";
-      } else if (text.includes('balance') || text.includes('money') || text.includes('wallet') || text.includes('paise') || text.includes('earning') || text.includes('कमाई')) {
-        setCurrentView('balance');
-        replyText = language === 'hi' 
-          ? "Maine aapka Wallet aur Earnings screen khol diya hai." 
-          : "Opened your Wallet & Earnings ledger screen.";
       } else if (text.includes('scan') || text.includes('billing') || text.includes('invoice') || text.includes('receipt') || text.includes('bill')) {
         setCurrentView('scan-sell');
         replyText = language === 'hi'
@@ -211,7 +229,7 @@ export const AIAssistant: React.FC = () => {
       } else {
         replyText = "Kripya sahi page ka naam bataiye, jaise: Inventory, Add Product, Scan & Sell, Wallet ya Orders. (Please specify a page like Inventory, Add Product, Scan & Sell, Wallet, or Orders.)";
       }
-    } 
+    }
     // 2. Autofill & Product description generator intent
     else if (text.includes('generate') || text.includes('create') || text.includes('autofill') || text.includes('saree') || text.includes('pottery') || text.includes('toy')) {
       if (text.includes('banarasi') || text.includes('silk') || text.includes('saree')) {
@@ -258,7 +276,7 @@ export const AIAssistant: React.FC = () => {
       }
     } 
     // 3. Question / Answer intents (answered from real app state, not canned data)
-    else if (text.includes('balance') || text.includes('wallet') || text.includes('paisa') || text.includes('कमाई')) {
+    else if (isWalletQuery(text)) {
       const balance = wallets['artisan-1']?.balance || 0;
       replyText = `Aapka current wallet balance ₹${balance.toLocaleString('en-IN')} hai. (Your wallet balance is ₹${balance.toLocaleString('en-IN')})`;
     } else if (text.includes('stock') || text.includes('maal') || text.includes('inventory')) {
@@ -278,14 +296,15 @@ export const AIAssistant: React.FC = () => {
       replyText = language === 'hi'
         ? `Aapke saare orders ka total revenue ₹${totalRevenue.toLocaleString('en-IN')} hai.`
         : `Your total revenue across all orders is ₹${totalRevenue.toLocaleString('en-IN')}.`;
-    } else if (text.includes('order') || text.includes('sourcing') || text.includes('ग्राहक')) {
+    } else if (isOrderQuery(text)) {
       const pendingCount = orders.filter(o => o.status !== 'delivered').length;
       replyText = `Aapke paas abhi ${pendingCount} active orders hain jo dispatch karne baki hain. (You have ${pendingCount} active orders waiting for dispatch.)`;
     }
     // 4. Fallback greetings / conversational (Gemini Powered)
     else {
       try {
-        const res = await fetch("http://localhost:5000/api/ai/chat", {
+        const API_BASE = import.meta.env.PROD ? 'https://shilpsetu.onrender.com/api' : 'http://localhost:5000/api';
+        const res = await fetch(`${API_BASE}/ai/chat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

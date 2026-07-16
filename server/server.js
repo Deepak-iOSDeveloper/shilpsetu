@@ -672,6 +672,17 @@ app.post('/api/products', (req, res) => {
   res.status(201).json(newProduct);
 });
 
+app.delete('/api/products/:id', (req, res) => {
+  const db = getDB();
+  const beforeCount = db.products.length;
+  db.products = db.products.filter(p => p.id !== req.params.id);
+  if (db.products.length === beforeCount) {
+    return res.status(404).json({ error: 'Product not found' });
+  }
+  saveDB(db);
+  res.status(204).end();
+});
+
 // RFQs routes
 app.get('/api/rfqs', (req, res) => {
   const db = getDB();
@@ -794,7 +805,7 @@ app.post('/api/products/analyze-image', upload.single('image'), async (req, res)
     Recommend a fair retail selling price in Indian Rupees (₹). Write a rich buyer-facing description.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-flash-latest',
       contents: [prompt, imagePart],
       config: {
         responseMimeType: "application/json",
@@ -861,7 +872,7 @@ app.post('/api/ai/chat', async (req, res) => {
     Answer the user query clearly, concisely, and supportively. Keep your answer under 3 sentences. Be extremely direct and accurate about these app sections.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-flash-latest',
       contents: [
         { role: 'user', parts: [{ text: systemPrompt + "\n\nUser query: " + message }] }
       ]
@@ -882,10 +893,10 @@ app.post('/api/ai/chat', async (req, res) => {
         reply = "प्रोडक्ट स्कैन करने के लिए आप नीचे बाएँ कोने में कैमरा बटन दबाएँ और फ़ोटो खींचें। हमारी AI उसकी शिल्प कला, सामग्री और सही कीमत का आकलन तुरंत कर देगी।";
       } else if (msg.includes('बिल') || msg.includes('bill') || msg.includes('रसीद') || msg.includes('invoice')) {
         reply = "बिल बनाने के लिए: 1. नीचे बार में 'Scan & Sell' सेक्शन पर जाएँ। 2. उत्पाद चुनें या स्कैन करें। 3. ग्राहक का नाम और नंबर भरें। 4. नीचे नारंगी रंग का 'Generate Bill' बटन दबाएँ।";
+      } else if (msg.includes('वॉलेट') || msg.includes('wallet') || msg.includes('बैलेंस') || msg.includes('रिचार्ज')) {
+        reply = "अपने वॉलेट बैलेंस को देखने या रिचार्ज करने के लिए प्रोफाइल मेनू के 'Wallet' विकल्प पर जाएँ। आप Razorpay द्वारा सुरक्षित रूप से पैसे जोड़ सकते हैं।";
       } else if (msg.includes('ऑर्डर') || msg.includes('order') || msg.includes('डिलीवरी') || msg.includes('delivery')) {
         reply = "आप अपने सभी एक्टिव ऑर्डर और उनकी डिलीवरी स्टेटस देखने के लिए नीचे दिए गए 'Orders' टैब पर जा सकते हैं। वहाँ प्रत्येक ऑर्डर का विस्तृत विवरण मौजूद है।";
-      } else if (msg.includes('वॉलेट') || msg.includes('wallet') || msg.includes('रिचार्ज')) {
-        reply = "अपने वॉलेट बैलेंस को देखने या रिचार्ज करने के लिए प्रोफाइल मेनू के 'Wallet' विकल्प पर जाएँ। आप Razorpay द्वारा सुरक्षित रूप से पैसे जोड़ सकते हैं।";
       } else if (msg.includes('मदद') || msg.includes('help') || msg.includes('सहायता')) {
         reply = "मैं आपकी पूरी सहायता करूँगा! आप मुझसे उत्पाद जोड़ने, बिल बनाने, कमाई देखने, पेमेंट ट्रैक करने या भारतीय हस्तशिल्प के बारे में कुछ भी पूछ सकते हैं।";
       } else {
@@ -909,10 +920,10 @@ app.post('/api/ai/chat', async (req, res) => {
         reply = "To scan a product, tap the camera icon in the bottom-left corner of the input area and snap a photo. Our AI will analyze its craft type, material, and recommend a fair price.";
       } else if (msg.includes('bill') || msg.includes('invoice') || msg.includes('receipt') || msg.includes('print')) {
         reply = "To generate a bill: 1. Go to the 'Scan & Sell' section in the bottom bar. 2. Select or scan a product. 3. Input client details. 4. Tap the orange 'Generate Bill' button at the bottom.";
-      } else if (msg.includes('order') || msg.includes('delivery') || msg.includes('track')) {
-        reply = "You can track all active orders, delivery updates, and logistics hub status under the 'Orders' tab in the bottom navigation bar.";
       } else if (msg.includes('wallet') || msg.includes('money') || msg.includes('recharge') || msg.includes('balance')) {
         reply = "To check your wallet balance or add credits, navigate to your Profile menu and select the Wallet tab. Recharges are secured by Razorpay.";
+      } else if (msg.includes('order') || msg.includes('delivery') || msg.includes('track')) {
+        reply = "You can track all active orders, delivery updates, and logistics hub status under the 'Orders' tab in the bottom navigation bar.";
       } else if (msg.includes('help') || msg.includes('support') || msg.includes('how to')) {
         reply = "I am here to support you! You can ask me how to list items, generate POS invoices, track order delivery, or check your earnings under the Wallet section.";
       } else {
@@ -927,11 +938,11 @@ app.post('/api/ai/chat', async (req, res) => {
 // AI Image Generation Studio (Imagen 3)
 app.post('/api/ai/image-studio', async (req, res) => {
   const { productId, style, metadata } = req.body;
-  
+
   const productName = metadata?.name || 'Handcrafted Indian Saree';
   const productMaterial = metadata?.material || 'Silk';
   const productCategory = metadata?.category || 'Apparel';
-  
+
   // Construct a descriptive prompt for Imagen 3
   const finalPrompt = `Professional product photography of a ${productName} made of ${productMaterial}, category ${productCategory}. Style instruction: ${style}. Clean studio lighting, 8k resolution, highly detailed texture.`;
 
@@ -954,7 +965,7 @@ app.post('/api/ai/image-studio', async (req, res) => {
       const base64Image = response.generatedImages[0].image.imageBytes;
       return res.json({ url: `data:image/jpeg;base64,${base64Image}` });
     }
-    
+
     throw new Error("No image generated by SDK");
   } catch (error) {
     console.warn("Imagen generation failed or API key not available, using dynamic fallback:", error.message);

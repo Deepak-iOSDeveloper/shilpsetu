@@ -2,13 +2,13 @@ import React, { useState, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
-import { 
+import {
   ChevronLeft, Sparkles, Camera, Mic, Copy,
-  RotateCcw, Info, CheckCircle2, Loader2, ExternalLink 
+  RotateCcw, Info, CheckCircle2, Loader2, ExternalLink, FileText
 } from 'lucide-react';
 
 export const AddProductAI: React.FC = () => {
-  const { addProduct, triggerAIAutofill, triggerAIImageStudio, setCurrentView, aiAutofillData, setAiAutofillData } = useApp();
+  const { addProduct, addDraft, drafts, triggerAIAutofill, triggerAIImageStudio, setCurrentView, aiAutofillData, setAiAutofillData } = useApp();
 
   React.useEffect(() => {
     if (aiAutofillData) {
@@ -21,7 +21,7 @@ export const AddProductAI: React.FC = () => {
       if (aiAutofillData.weight) setWeight(aiAutofillData.weight);
       if (aiAutofillData.description) setDescription(aiAutofillData.description);
       if (aiAutofillData.image) setUploadedImages([aiAutofillData.image]);
-      
+
       // Clear it
       setAiAutofillData(null);
     }
@@ -86,7 +86,7 @@ export const AddProductAI: React.FC = () => {
           return next;
         });
         setActiveIndex(0);
-        
+
         // Trigger AI analysis ONLY for the main product image
         analyzeImage(file);
       } else {
@@ -242,6 +242,28 @@ export const AddProductAI: React.FC = () => {
     }
   };
 
+  const handleSaveDraft = () => {
+    if (!name && uploadedImages.length === 0) {
+      alert("Please add at least a product name or photo before saving as a draft.");
+      return;
+    }
+
+    addDraft({
+      name,
+      category,
+      craftType,
+      material,
+      price,
+      stockQty,
+      weight,
+      description,
+      images: uploadedImages
+    });
+
+    alert("Draft saved! You can find it under 'My Drafts'.");
+    setCurrentView('dashboard');
+  };
+
   return (
     <div className="absolute inset-0 bg-[#FFF8F1] flex flex-col overflow-hidden text-left pb-8">
       {/* Header */}
@@ -261,9 +283,19 @@ export const AddProductAI: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-secondary-light px-3 py-1.5 rounded-full border border-secondary/20 text-xs font-bold text-secondary-dark">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>AI Magic</span>
+        <div className="flex flex-col items-end gap-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => setCurrentView('drafts')}
+            className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full border border-stone-200 text-[10px] font-black text-stone-600 hover:bg-stone-50 transition-all shadow-xs"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>My Drafts{drafts.length > 0 ? ` (${drafts.length})` : ''}</span>
+          </button>
+          <div className="flex items-center gap-1.5 bg-secondary-light px-3 py-1.5 rounded-full border border-secondary/20 text-xs font-bold text-secondary-dark">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>AI Magic</span>
+          </div>
         </div>
       </div>
 
@@ -604,10 +636,7 @@ export const AddProductAI: React.FC = () => {
         {/* Footer buttons */}
         <div className="flex gap-3">
           <button
-            onClick={() => {
-              alert("Draft saved to offline drafts folder!");
-              setCurrentView('dashboard');
-            }}
+            onClick={handleSaveDraft}
             className="flex-1 py-4 text-sm font-bold text-text-primary border border-stone-200 bg-white rounded-xl hover:bg-stone-50 shadow-sm"
           >
             Save Draft
